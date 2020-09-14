@@ -1,0 +1,68 @@
+---
+title: 'Homework #1: Intro to R'
+author: "Mickayla Johnston"
+date: "9/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### 1. Load quakes with data(quakes). Show what’s there with str() and summary().
+```{r}
+data("quakes")
+```
+##### str-ing it:
+str(quakes)
+
+##### Summarizing it:
+summary(quakes)
+```
+
+\
+
+#### 2. Show the entirity of the column "long"
+```{r}
+quakes[["long"]]
+```
+
+\
+
+#### 3. Hey, another useful function - unique()! Apply it to a vector, and you can see what are all of the unique values.
+```{r}
+unique(quakes[["stations"]])
+```
+
+\
+
+#### 4. What unique stations are there? Use length() with unique() to determine how many stations there are.
+```{r}
+length(unique(quakes[["stations"]]))
+```
+##### There are 102 stations
+
+\
+
+#### 5.Using range(), what is the range of depths where quakes occur?
+```{r}
+range(quakes[["depth"]])
+```
+##### The range is 40 to 680
+
+\
+
+#### Extra Credit: Where was the earthquake of largest magnitude found?  
+##### My roundabout way of getting the answer :-) 
+```{r}
+max(quakes[["mag"]])
+
+match(6.4, quakes[["mag"]])
+
+quakes[152, "stations"]
+```
+#### The earthquake with the largest magnitude was a 6.4 and was at station 122!  
+Note: I'm uploading to github as well ([here](https://github.com/mickayla32/bio607))  
+Please let me know if I'm doing this incorrectly :) 
+ 
+
