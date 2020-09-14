@@ -1,0 +1,60 @@
+---
+title: "My First Markdown"
+author: "Mickayla Johnston"
+date: "9/11/2020"
+output: html_document
+---
+
+\
+
+# Toplevel
+## Smaller
+### Even smaller
+#### Even smaller!
+
+*bold*
+**italic**
+
+\
+
+#### Use two spaces for a return & 6 spaces for an indent
+- list item 1  
+      - subitem
+      
+\
+
+#### Create a list:
+1. item 1
+2. item 2
+3. item 3
+
+\
+
+```{r}
+# Code goes here 
+```
+
+\
+
+echo = FALSE makes it so code doesn't show
+```{r, echo = FALSE}
+data("mtcars")
+head(mtcars)
+```
+
+chunk with options  
+No warnings, no messages
+```{r, warning=FALSE, message = FALSE}
+rowMeans(mtcars)
+```
+
+\
+
+include = FALSE makes it so nothing shows-- no code and no output
+
+*To set options for the whole markdown*:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
