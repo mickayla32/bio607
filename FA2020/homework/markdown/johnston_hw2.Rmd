@@ -1,0 +1,282 @@
+---
+title: 'Homework 2: Sampling and Iteration'
+author: "Mickayla Johnston"
+date: "9/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r, include=FALSE}
+library(dplyr)
+library(magrittr)
+library(purrr)
+library(tidyr)
+library(kableExtra)
+library(stringr)
+library(formattable)
+```
+
+#### 1. Some Data with Flippers  
+
+##### 1a. Load the library palmerpenguins after installing it.
+```{r}
+#install.packages("palmerpenguins")
+library(palmerpenguins) 
+data("penguins")
+```
+
+\
+
+##### 1b. Show the head of the dataset penguins
+```{r}
+head(penguins)
+```
+
+\
+
+##### 1c. What do you learn by using str() and summary() on penguins()
+```{r}
+str(penguins)
+```
+
+From str I can see that there are NAs in the columns bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, and sex. I can also see what class each column is, the levels of each factor column, and the range of each numeric and integer column. 
+
+```{r}
+summary(penguins)
+```
+
+From summary I can see how many NAs per column there are-- 2 in bill length, 2 in bill depth, 2 in flipper length, 2 in body mass, and 11 in sex. I can also see the min, max, 1st and 3rd quartiles, median, and mean of each column.
+
+\
+
+##### 1d. What are the quantiles of bill depth across the whole data set? What do those quantiles mean?  
+```{r}
+quantile(penguins$bill_depth_mm, na.rm = TRUE)
+```
+0% quantile = 13.1  
+25% quantile = 15.6  
+50% quantile = 17.3  
+75% quantile = 18.7  
+100% quantile = 21.5  
+These mean that, for each corresponding quantile, x% of the data is less than or equal to that value. For example, the 25% quantile is 15.6, so 25% of the data for bill depth is less than or equal to 15.6.
+
+#### 2. What’s here? Let’s use dplyr!  
+
+##### 2a. If I have a vector, c(1,4,7,NA,9), what is its mean? Note, the NA is going to cause a problem. Look at ?mean to learn how to solve it.
+```{r}
+vec <- c(1,4,7,NA,9)
+?mean()
+mean(vec, na.rm = TRUE)
+```
+The mean is 5.25
+
+##### 2b. What is the mean, sd, and median of body mass across the data set? Note, these NAs are going to cause some problems, so you might need to look at the documentation for the relevant functions.
+```{r}
+mean(penguins$body_mass_g, na.rm = TRUE)
+```
+Mean: 4201.754
+
+\
+
+```{r}
+sd(penguins$body_mass_g, na.rm = TRUE)
+```
+SD: 801.9545
+
+\
+
+```{r}
+median(penguins$body_mass_g, na.rm = TRUE)
+```
+Median: 4050
+
+\
+
+#### 2c. Repeat 2b, but, show us how these quantities differ by species
+```{r}
+penguins_species_group <- penguins %>%
+  group_by(species) %>%
+  mutate(avg_mass = mean(body_mass_g, na.rm = TRUE),
+         sd_mass = sd(body_mass_g, na.rm = TRUE),
+         med_mass = median(body_mass_g, na.rm = TRUE)) %>%
+  ungroup()
+
+# Avg. mass, sd of mass, and median of mass by species
+penguins_species_group %>%
+  group_by(species, avg_mass, sd_mass, med_mass) %>%
+  summarize()
+```
+
+
+\
+
+##### 2d. Repeat 2c, but just for Biscoe island. What is different in the results?
+```{r}
+penguins_species_group_biscoe <- penguins %>%
+  group_by(species) %>%
+  filter(island == 'Biscoe') %>%
+  mutate(avg_mass = mean(body_mass_g, na.rm = TRUE),
+         sd_mass = sd(body_mass_g, na.rm = TRUE),
+         med_mass = median(body_mass_g, na.rm = TRUE)) %>%
+  ungroup()
+
+penguins_species_group_biscoe %>%
+  group_by(species, avg_mass, sd_mass, med_mass) %>%
+  summarize()
+```
+There are only 2 species of penguin now!
+
+##### 2e. Make a species-island column in penguins using paste().  
+
+
+Test paste()
+```{r}
+paste("Hello", "Goodbye", sep = "! ")
+```
+
+\
+
+```{r}
+penguins <- penguins %>%
+  mutate(species_island = paste(species, island, sep = "_"))
+
+str(penguins)
+```
+
+#### 3. A Little Light Plotting  
+
+##### 3a. Show the distribution of flipper_length_mm by species and island using boxplots.   
+For one point of extra credit, redo creating the species_island column with the sep as \n instead of _. What does \n do? You will find it very handy in the future.
+
+```{r}
+boxplot(flipper_length_mm ~ species, data = penguins)
+boxplot(flipper_length_mm ~ island, data = penguins)
+```
+
+\
+
+
+Extra Credit:
+```{r}
+penguins <- penguins %>%
+  mutate(species_island = paste(species, island, sep = "\n"))
+```
+  
+This makes the sep between the words a space
+
+\
+
+##### 3b. Show the relationship between average flipper length and average body mass by species and island. What do you see?  
+```{r}
+penguins <- penguins %>%
+  dplyr::group_by(species_island) %>%
+  dplyr::mutate(avg_flip = mean(flipper_length_mm, na.rm = TRUE),
+         avg_body = mean(body_mass_g, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+plot(avg_flip ~ avg_body, data =penguins)
+```
+  
+Penguins with higher body mass have larger flipper lengths.
+
+\
+
+##### 3c. Interesting. What if you had made the same plot with the whole dataset? What do you see? Is there anything that could clarify the result any more? Think about it - lots of possible right answers here.
+```{r}
+penguins2 <- penguins %>%
+  dplyr::mutate(avg_flip = mean(flipper_length_mm, na.rm = TRUE),
+         avg_body = mean(body_mass_g, na.rm = TRUE))
+
+plot(avg_flip ~ avg_body, data = penguins2)
+```
+  
+This shows just 1 point... Coloring points by island or by species, (or by both) may clarify the results more, so we can see how they differ by island and/or species
+
+
+#### 4. Let’s get ready to simulate  
+
+##### 4a. Grab the values for bill_length_mm for Gentoo penguins in Biscoe Island and put it into an object.
+```{r}
+penguins <- penguins %>%
+  mutate(species_island = paste(species, island, sep = "_"))
+
+bill_gentoo_biscoe <- penguins %>%
+  filter(species_island == 'Gentoo_Biscoe') %>%
+  select(bill_length_mm)
+```
+
+\
+
+##### 4b. Use replicate() to calculate the standard error of the mean 10 times. Use a formula! Don’t forget that NA values shouldn’t be included!
+```{r}
+replicate(n = 10, sd(bill_gentoo_biscoe$bill_length_mm, na.rm = TRUE) / sqrt(length(bill_gentoo_biscoe$bill_length_mm)))
+```
+
+\
+
+##### 4c. Use map_df() to create a data frame with the mean and sd of different sample sizes using the first 5 through 100 values (so, n = 5:100 - smallest sample size will have the values 1-5). Make sure the sample size is included in the final data frame.
+
+```{r}
+samp_size <- map_df(5:100, ~data.frame(avg = mean(bill_gentoo_biscoe$bill_length_mm[1:.x]),
+                          sd = sd(bill_gentoo_biscoe$bill_length_mm[1:.x]),
+                          sampsize = .x))
+samp_size
+```
+
+\
+
+##### 4d. Plot the relationship between sample size and SD and sample size versus SE of the mean. What difference do you see and why? Note, you’ll need to create a column for SE here!
+```{r}
+plot(sd ~ sampsize, data = samp_size)
+
+samp_size_se <- map_df(5:100, ~data.frame(avg = mean(bill_gentoo_biscoe$bill_length_mm[1:.x]),
+                                       sd = sd(bill_gentoo_biscoe$bill_length_mm[1:.x]),
+                                       sampsize = .x,
+                          se = sd(bill_gentoo_biscoe$bill_length_mm[1:.x], na.rm = TRUE) / sqrt(length(bill_gentoo_biscoe$bill_length_mm[1:.x]))))
+
+plot(se ~ sampsize, data = samp_size_se)
+```
+  
+The standard deviation is higher with higher sample size overall, but pretty consistent from sample sizes 40-100... On the other hand, the standard error appears to decrease with higher sample size.    
+This is because standard deviation is a population parameter, and should not change based on sample size.  
+SE is a measure of precision, and will therefore decrease as you increase sample size (because precision increases).
+
+\
+
+#### Extra Credit: Make a beautiful table showing the average properties of bills of penguins by species, sex, and island.
+```{r}
+test <- penguins %>%
+  dplyr::group_by(species, sex, island) %>%
+  dplyr::mutate(avg_bill_length_spec = mean(bill_length_mm, na.rm = TRUE),
+         avg_bill_depth_spec = mean(bill_depth_mm, na.rm = TRUE),
+         avg_bill_length_sex = mean(bill_length_mm, na.rm = TRUE),
+         avg_bill_depth_sex = mean(bill_depth_mm, na.rm = TRUE),
+         avg_bill_length_isl = mean(bill_length_mm, na.rm = TRUE),
+         avg_bill_depth_isl = mean(bill_depth_mm, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+tabledf_1 <- test %>%
+  dplyr::filter(sex == "female" | sex == "male") %>%
+  dplyr::select(species, island, sex, avg_bill_length_spec, avg_bill_depth_spec,
+                avg_bill_length_sex, avg_bill_depth_sex, avg_bill_length_isl, avg_bill_depth_isl)
+
+tabledf_3 <- dplyr::distinct(.data = tabledf_1, .keep_all = TRUE)
+
+```
+
+\
+
+This was as beautiful as I could make it :-)
+```{r}
+kbl(tabledf_3) %>%
+  kable_paper(c("hover"), full_width = F) %>%
+  kable_styling(fixed_thead = TRUE) %>%
+  row_spec(row = c(2,3,5,7,9), color = "white", background = "pink") %>%
+    row_spec(row = c(1,4,6,8,10), color = "white", background = "cadetblue")
+
+
+```
