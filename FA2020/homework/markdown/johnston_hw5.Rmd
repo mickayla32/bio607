@@ -1,0 +1,435 @@
+---
+title: 'Homework Week 5: Correlation & Regression'
+author: "Mickayla Johnston"
+date: "10/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+##### Libraries
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+##### Load data
+```{r}
+getwd()
+language <- read.csv("../data/week_5/chap16q15LanguageGreyMatter.csv")
+liver <- read.csv("../data/week_5/chap16q19LiverPreparation.csv")
+nutrients <- read.csv("../data/week_5/chap17q19GrasslandNutrientsPlantSpecies.csv")
+beetles <- read.csv("../data/week_5/chap17q25BeetleWingsAndHorns.csv")
+nuclear <- read.csv("../data/week_5/chap17q30NuclearTeeth.csv")
+```
+
+##### See what's there
+```{r}
+str(language)
+skimr::skim(language)
+summary(language)
+```
+
+#### 1. Correlation: W&S ch.16
+
+\
+
+##### 1a. Display the association between the 2 variables in a scatterplot
+```{r}
+language_plot <- ggplot(data = language,
+                    mapping = aes(x = proficiency, y = greymatter)) +
+  geom_point()
+```
+
+###### View it
+```{r}
+language_plot
+```
+
+##### 1b. Calculate the correlation between language proficiency and gray matter density
+```{r}
+cor(language)
+```
+###### The correlation is 0.8183134
+  
+\
+
+##### 1c. Test the null hypothesis of zero correlation  
+###### The null hypothesis is that there is no correlation between language proficiency and gray matter density
+###### The alternative hypothesis is that there is a correlation between language proficinecy and gray matter density  
+
+\
+
+##### Fit model
+```{r}
+language_mod <- lm(greymatter ~ proficiency,
+                   data = language)
+```
+
+##### View model
+```{r}
+summary(language_mod)
+```
+
+###### The t-value is 6.367, and the p-value of 3.264e-06 is less than 0.05, so we can reject the null hypothesis of zero correlation.
+ 
+
+\
+
+##### 1d. What are your assumptions?  
+###### Assumptions of correlation testing:  
+     1. The observations are from a random sample
+     2. Each observation is independent
+     3. x & y are from a bivariate normal distribution
+     
+\
+
+##### 1e. Does your scatter plot support these assumptions?
+###### According to W&S (ch.16), a scatter plot of data from a bivariate normal distribution should show that the x & y relationship is linear, and the cloud of points in the scatter plot should have a circular / elliptical shape. Although there aren't many points in the scatterplot (see above), it does seem to support these assumptions. However, it should be pointed out that there is a gap in the "elliptical shape" in the scatter plot, from the two points in the bottom left corner (possible outliers?).
+```{r}
+language_plot + stat_smooth(method = lm)
+```
+
+\
+
+##### 1f. Do the results indicate that language proficiency effects graymatter area in the brain? Why or why not?  
+###### Yes, from the test of zero correlation, we were able to reject the null hypothesis that there is no correlation between language proficiency and graymatter area (p = 3.264e-06) (see below.) Also...
+     1. from the scatter plot, we can see a pretty strong positive relationship between the two variables. The plot shows that as proficiency increases, greymatter also increases.
+     2. The correlation coefficient (which can range from -1 to 1) is 0.8183134, the t-value is 6.367, and the p-value of 3.264e-06. The t-value is pretty large, and the p-value tells us that the strength of support for rejecting the null hypothesis that there is no correlation between the variables of language proficiency and gray matter is pretty strong. There is a 0.0003264% chance of obtaining the observed data or more extreme data, given the null hypothesis is true.
+
+\
+
+#### 2. Rat Liver Data:
+```{r}
+str(liver)
+```
+
+\
+
+##### 2a. Calculate the correlation between the two variables
+```{r}
+cor(liver)
+```
+###### The correlation is -0.8563765  
+
+\
+
+##### 2b. Plot the relationship
+```{r}
+liver_plot <- ggplot(data = liver,
+mapping = aes(x = concentration, y = unboundFraction)) +
+  geom_point()
+```
+
+###### View it
+```{r}
+liver_plot
+```
+
+##### 2c. The relationship appears to be maximlly strong, yet the correlation coefficient is not near the maximum possible value. Why not?  
+###### The plot appears to show a curve in the data-- so, the relationship is non-linear.  
+
+\
+
+##### 2d. What steps would you take to ensure the assumptions of the correlation analysis were met?  
+###### Make sure that the sampling procedure involves true random sampling: every individual in the population has an equal chance of being sampled, and the sampling of each individual is independent from one another. In the case of this experiment, one should ensure rats are chosen at random (ensuring the criteria listed above are met). Each rat can be numbered, and then using a random number generator, rats can be selected for the experiment. Also, as noted in W&S, we can log-transform the data to make the shape of the relationship linear, so that an lm can be used. Or, another method such as Spearman's r can be used.
+
+\
+
+#### 3. Correlation SE
+```{r}
+happy_cats <- data.frame(cats = c(-0.30	, 0.42, 0.85, -0.45	, 0.22, -0.12	, 1.46, -0.79, 0.40, -0.07),
+                         happiness_score = c(-0.57, -0.10, -0.04, -0.29, 0.42, -0.92, 0.99, -0.62, 1.14, 0.33))
+
+happy_cats
+```
+
+##### 3a. Are these two variables correlated? What is the output of cor() here. What does a test show you?
+```{r}
+cor(happy_cats)
+#                 cats          happiness_score
+# cats            1.0000000       0.6758738
+# happiness_score 0.6758738       1.0000000
+```
+###### The output shows that the r value is 0.6758738, which doesn't indicate a very strong correlation. The r value tells us the strength / degree of association between the variables "cats" and "happiness score"  
+
+\
+
+##### 3b. What is the SE of the correlation based on the info from cor.test()
+```{r}
+cor.test(happy_cats$cats, happy_cats$happiness_score)
+```
+ 
+###### Equation = squareroot of (1-r^2)/ (n-2)    
+
+r^2
+```{r}
+0.6758738^2
+```
+0.4568054  
+
+```{r}
+1 - 0.4568054 
+```
+= 0.5431946  
+
+n-2 
+```{r}
+nrow(happy_cats)
+```
+10-2 = 8  
+
+
+```{r}
+sqrt((0.5431946) / 8)
+```
+###### ANSWER: 0.260575
+
+\
+
+##### 3c. Now, what is the SE via simulation? To do this, you’ll need to use cor() and get the relevant parameter from the output (remember - you get a matrix back, so, what’s the right index!), replicate(), and sample() or dplyr::sample_n() with replace=TRUE to get, let’s say, 1000 correlations. How does this compare to your value above?
+
+###### Test cor()[1,2]
+```{r}
+cor(happy_cats)[1,2]
+```
+
+###### Run sims
+```{r}
+cat_sim <- 
+  # replicate
+  replicate(1000,
+            # cor
+            cor(
+              # sample & correct index [1,2]
+              sample(happy_cats, 
+                     size = length(happy_cats), 
+                     replace=TRUE))[1,2])
+```
+
+###### Get SE
+```{r}
+sd(cat_sim)
+```
+##### How does this compare to answer from 3b:  
+###### Value from 3b: 0.260575 vs. Value from sims: 0.1620894... These values are not too different, only about 0.1 apart.
+
+\
+
+#### 4. W&S Ch.17
+```{r}
+str(nutrients)
+```
+
+##### 4a. Draw a scatter plot. What is the x variable and what is the y?  
+###### The x variable is nutrients, and the y is species
+
+```{r}
+nutrients_plot <- ggplot(data = nutrients,
+                         mapping = aes(x = nutrients, y = species)) +
+  geom_point()
+
+# view it
+nutrients_plot
+```
+
+\
+
+##### 4b. What is the rate of change in the number of plant species supported per nutrient type added? Provide the SE for your estimate  
+
+###### Fit model 
+```{r}
+nutrients_mod <- lm(species ~ nutrients, data = nutrients)
+
+# View it
+summary(nutrients_mod)
+```
+###### The slope is -3.339. This means that for every 1 nutrient added, ~3.3 species are lost.  
+###### The SE is 1.098  
+
+\
+
+##### 4c. Add the least-squares regression line to your scatter plot. What fraction of the variation in the number of plant species is explained by the number of nutrients added?
+
+```{r}
+nutrients_plot + stat_smooth(method = lm)
+```
+  
+###### Answer: 0.536 of the variation in the number of plant species is explained by the number of nutrients added (The R2 value from the summary output)  
+
+\
+
+##### 4d. Test the null hypothesis of no treatment effect on the number of plant species  
+###### t-value = -3.04 
+###### p-value = 0.0161, which means we can reject the null hypothesis that the addition of nutrients has no effect on the number of species 
+
+\
+
+#### 5. W&S Chapter 17-25  
+
+##### 5a. Use these results to calculate the residuals  
+
+###### Fit a model
+```{r}
+beetle_mod <- lm(wingMass ~ hornSize, data = beetles)
+
+# view model
+beetle_mod
+```
+
+###### Calculate resids
+```{r}
+beetle_resids <- residuals(beetle_mod)
+
+# View it
+beetle_resids
+
+# Make it a df
+beetle_resids_df <- as.data.frame(beetle_resids)
+
+# Combine it with beetles data
+resid_plot_df <- cbind(beetles, beetle_resids_df)
+
+# View it
+resid_plot_df
+```
+
+\
+
+##### 5b. Use your results from part a to calculate a residuals plot 
+```{r}
+ggplot(data = resid_plot_df, 
+       mapping = aes(x = hornSize,
+                     y = beetle_resids)) +
+  geom_point()
+```
+
+##### 5c. Use the graph provided and your residual plotto evaluate the main assumptions of linear regression.  
+###### The results from the plot of residuals vs. horn size do not show any pattern.  
+###### The scatter plot that was provided (wing mass vs. horn size) seems to fit a linear model well, but there are some deviations from the regrssion line, that may indicate that a non-linear model would be more appropriate.  
+
+\
+
+##### 5d. In light of your conclusions from part c, what steps should be taken?  
+###### Other assumption tests can be explored (next question), and/or the data can be transformed and the model refit. A log transformation can get rid of the negative values in the data.
+
+\
+
+##### 5e. Do any other diagnostics misbehave?  
+```{r}
+plot(beetle_mod, which = 1) # RESIDUALS VS. FITTED
+```
+  
+###### The residuals vs. fitted plot doesn't seem to be too bad, though the points do sort of fall along the horizontal line.These points should be random- there should be no pattern, thus indicating the assumption of equal variance of errors is met.    
+
+```{r}
+plot(beetle_mod, which = 2) # Q-Q PLOT
+```
+  
+###### The Q-Q plot seems ok as well- the points fall along the line for the most part, thus indicating the normality of errors assumption is met.    
+
+```{r}
+plot(beetle_mod, which = 4)
+```
+  
+###### The Cook's distance plot has values close to 1, which can indicate a problem with outliers. This is the minimal outlier influence assumption of linear models.  
+
+```{r}
+plot(beetle_mod, which = 5) # RESIDUALS VS LEVERAGE
+```
+  
+###### The residuals vs. leverage plot shows that point 6 and 19 may be problem outliers, thus effecting the regression line that's fit to the model.  
+
+\
+
+#### 6. W&S Ch. 17-30  
+
+##### 6a. What is the approximate slope of the line?  
+###### The slope looks to be close to -1.
+
+\
+
+#####  6b. Which pair of lines show the confidence bands? What do these confidence bands tell us?
+###### The narrower pair of dashed lines, closest to the solid regression line are the confidence bands. These show the precision and interval around the predicted relationship due to coefficient error/precision
+
+\
+
+#####   6c Which pair of lines show the prediction interval? What do these tell us?
+###### The wider dashed lines, furthest from the solid regression line are the prediction interval bands. These show us the interval where a new predicted value of Y could occur, given a new value of X... i.e. what we MIGHT observe. The prediction interval is wider bc its taking into account *residual* error of the model
+
+\
+
+##### 6d. Using `predict()` and `geom_ribbon()` in ggplot2, reproduce the above plot showing data, fit, fit interval, and prediction interval.
+
+```{r}
+# Fit this model
+nuclear_mod <- lm(dateOfBirth ~ deltaC14, data = nuclear)
+
+# Regular fit plot
+
+nuclear_plot <- ggplot(data = nuclear,
+                       mapping = aes(x = deltaC14,
+                                     y = dateOfBirth)) +
+  geom_point()
+
+# View it
+nuclear_plot
+
+# Add regression line
+nuclear_plot + stat_smooth(method = lm)
+
+# CI values
+fit_nuclear <- predict.lm(nuclear_mod,
+                        interval = "confidence") %>%
+  # turned it into a df or tibble
+  as_tibble() %>%
+  # renamed columns for clarity
+  rename(lwr_ci = lwr,
+         upr_ci = upr)
+
+# combine them
+nuclear <- cbind(nuclear, fit_nuclear)
+
+# Predicted values
+predict_nuclear <- predict(nuclear_mod,
+                         interval = "prediction") %>%
+  as_tibble() %>%
+  # rename columns for clarity
+  rename(lwr_pi = lwr, # upper and lower prediction intervals
+         upr_pi = upr)
+
+# cbind again
+nuclear <- cbind(nuclear, predict_nuclear) 
+
+# view it
+head(nuclear)
+
+# clean the names to get rid of 2 fit columns-- makes the col names have _ instead of .
+nuclear <- janitor::clean_names(nuclear)
+
+names(nuclear)
+
+# look at it
+head(nuclear)
+
+# Plot with data, fit, fit interval, and prediction interval
+ggplot(data = nuclear,
+       mapping = aes(x = delta_c14,
+                     y = date_of_birth)) +
+  # prediction intervals-- predicting new values--  if we picked a new value 95% of the time, it should fall in this range
+  geom_ribbon(mapping = aes(ymin = lwr_pi,
+                            ymax = upr_pi),
+              alpha = 0.2) +
+  # model fit
+  geom_point(color = "black", size = 2) + 
+  stat_smooth(method = lm) +
+  # fit interval -- just coefficient error (precision)
+  geom_ribbon(mapping = aes(ymin = lwr_ci,
+                            ymax = upr_ci),
+              color = "red",
+              alpha = 0.3)
+```
+
+###### The data points are in black, the regression line is in blue, the red lines are the fit interval, and the lighter gray is the prediction interval.

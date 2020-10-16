@@ -5,7 +5,7 @@
   #### Did I precisely measure an estimate?
 
   # We have drawn our SE from a sample- not the population
-  # Our estimate of +/- 1 SE tells us 2.3 of the estimates we could get by soley resampling this sample
+  # Our estimate of +/- 1 SE tells us 2/3 of the estimates we could get by soley resampling this sample
     # BASED ON OUR SAMPLE - NOT ON THE POPULATION
     # This is not 2/3 of the possible TRUE PARAMETER VALUES-- 2/3 of the possible values we could of gotten from OUR SAMPLE
     # Rather, if we were to sample the population many many times, 2/3 of the time, this interval will contain the true value

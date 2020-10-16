@@ -215,6 +215,7 @@ bill_gentoo_biscoe <- penguins %>%
 ```{r}
 replicate(n = 10, sd(bill_gentoo_biscoe$bill_length_mm, na.rm = TRUE) / sqrt(length(bill_gentoo_biscoe$bill_length_mm)))
 ```
+The SE is 0.276759
 
 \
 
